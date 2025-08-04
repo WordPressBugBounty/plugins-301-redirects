@@ -3,14 +3,15 @@
   Plugin Name: 301 Redirects
   Plugin URI: https://wp301redirects.com/
   Description: Easily create & manage redirections, and view 404 error log.
-  Version: 1.04
+  Version: 1.05
   Author: WebFactory Ltd
   Author URI: https://www.webfactoryltd.com/
   Requires at least: 4.0
-  Tested up to: 6.6
+  Tested up to: 6.8
   Requires PHP: 5.2
+  License: GPLv2 or later
 
-  Copyright 2019 - 2024  WebFactory Ltd  (email: wp301@webfactoryltd.com)
+  Copyright 2019 - 2025  WebFactory Ltd  (email: wp301@webfactoryltd.com)
   Copyright 2015 - 2019  @tonyspiro
 
   This program is free software; you can redistribute it and/or modify
@@ -143,14 +144,14 @@ class ts_redirects
       $log404 = array();
     }
 
-    $ua = \tsdonatj\UserAgent\parse_user_agent(@strip_tags($_SERVER['HTTP_USER_AGENT']));
+    $ua = \tsdonatj\UserAgent\parse_user_agent(wp_strip_all_tags(wp_unslash($_SERVER['HTTP_USER_AGENT'] ?? '')));
     $agent = trim(@$ua['platform'] . ' ' . @$ua['browser']);
     if (empty($agent)) {
       $agent = 'unknown';
     }
 
     $last['timestamp'] = current_time('timestamp');
-    $last['url'] = @strip_tags($_SERVER['REQUEST_URI']);
+    $last['url'] = wp_strip_all_tags(wp_unslash($_SERVER['REQUEST_URI'] ?? ''));
     $last['user_agent'] = $agent;
     array_unshift($log404, $last);
 
@@ -194,7 +195,7 @@ class ts_redirects
         $redirects->delete();
         die('1');
       } else {
-        $custom_id = (int) sanitize_text_field($_POST['custom_id']);
+        $custom_id = (int) sanitize_text_field(wp_unslash($_POST['custom_id']));
         $redirects->remove($custom_id);
         die('1');
       }
@@ -206,7 +207,11 @@ class ts_redirects
 
   static function getUrl()
   {
-    $url  = @($_SERVER["HTTPS"] != 'on') ? 'http://' . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"] : 'https://' . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"];
+    $https = sanitize_text_field(wp_unslash($_SERVER["HTTPS"] ?? ''));
+    $host = sanitize_text_field(wp_unslash($_SERVER["HTTP_HOST"] ?? ''));
+    $request_url = sanitize_text_field(wp_unslash($_SERVER["REQUEST_URI"] ?? ''));
+
+    $url  = ($https != 'on') ? 'http://' . $host . $request_url : 'https://' . $host . $request_url;
     return $url;
   } // getUrl
 
@@ -221,12 +226,13 @@ class ts_redirects
       $redirects->delete();
 
       if (!empty($_POST['title'])) {
-        $redirect_arr = $_POST['title'];
+        //phpcs:ignore $_POST['title'] is an array and each value is sanitized individually below
+        $redirect_arr = $_POST['title']; //phpcs:ignore
         foreach ($redirect_arr as $key => $redirect_title) {
           $title = sanitize_text_field($redirect_title);
-          $section = sanitize_text_field($_POST['section'][$key]);
-          $new_link = esc_url($_POST['new_link'][$key]);
-          $old_link = esc_url($_POST['old_link'][$key]);
+          $section = array_key_exists($key, $_POST['section']) ? sanitize_text_field(wp_unslash($_POST['section'][$key] ?? '')) : '';
+          $new_link = sanitize_url(wp_unslash($_POST['new_link'][$key] ?? ''));
+          $old_link = sanitize_url(wp_unslash($_POST['old_link'][$key] ?? ''));
           $redirects->edit($title, $section, $new_link, $old_link);
         }
       }
@@ -383,7 +389,7 @@ class ts_redirects
 
       foreach ($log as $l) {
         echo '<tr>';
-        echo '<td nowrap><abbr title="' . esc_html(date(get_option('date_format'), $l['timestamp']) . ' @ ' . date(get_option('time_format'), $l['timestamp']))  . '">' . esc_html(human_time_diff(current_time('timestamp'), $l['timestamp'])) . ' ago</abbr></td>';
+        echo '<td nowrap><abbr title="' . esc_html(gmdate(get_option('date_format'), $l['timestamp']) . ' @ ' . gmdate(get_option('time_format'), $l['timestamp']))  . '">' . esc_html(human_time_diff(current_time('timestamp'), $l['timestamp'])) . ' ago</abbr></td>';
         echo '<td><a target="_blank" href="' . esc_html($l['url']) . '">' . esc_html($l['url']) . '</a></td>';
         echo '<td nowrap>' . esc_html($l['user_agent']) . '</td>';
         echo '<td nowrap><a href="#" class="open-301-pro-dialog pro-feature" data-pro-feature="404-log-user-location">Available in PRO</a></td>';
@@ -439,7 +445,7 @@ class ts_redirects
       $i = 1;
       foreach ($log as $l) {
         echo '<tr>';
-        echo '<td nowrap><abbr title="' . esc_html(date(get_option('date_format'), $l['timestamp']) . ' @ ' . date(get_option('time_format'), $l['timestamp']))  . '">' . esc_html(human_time_diff(current_time('timestamp'), $l['timestamp'])) . ' ago</abbr></td>';
+        echo '<td nowrap><abbr title="' . esc_html(gmdate(get_option('date_format'), $l['timestamp']) . ' @ ' . gmdate(get_option('time_format'), $l['timestamp']))  . '">' . esc_html(human_time_diff(current_time('timestamp'), $l['timestamp'])) . ' ago</abbr></td>';
         echo '<td><a title="Open target URL in a new tab" target="_blank" href="' . esc_html($l['url']) . '">' . esc_html($l['url']) . '</a> <span class="dashicons dashicons-external"></span></td>';
         echo '<td>' . esc_html($l['user_agent']) . '</td>';
         echo '</tr>';

@@ -5,16 +5,15 @@ class Redirects
   {
     global $wpdb;
 
-    $sql = "TRUNCATE TABLE {$wpdb->prefix}ts_redirects";
-    $wpdb->query($sql);
+    $wpdb->query("TRUNCATE TABLE {$wpdb->prefix}ts_redirects");
   } // delete
 
 
   function edit($title, $section, $new_link, $old_link)
   {
     global $wpdb;
-    $sql = $wpdb->prepare("INSERT INTO {$wpdb->prefix}ts_redirects (title, section, new_link, old_link) VALUES (%s, %s, %s, %s)", array($title, $section, $new_link, $old_link));
-    $wpdb->query($sql);
+    //phpcs:ignore because we are using a custom table for redirect rules
+    $wpdb->query($wpdb->prepare("INSERT INTO {$wpdb->prefix}ts_redirects (title, section, new_link, old_link) VALUES (%s, %s, %s, %s)", array($title, $section, $new_link, $old_link))); //phpcs:ignore
   } // edit
 
 
@@ -22,11 +21,10 @@ class Redirects
   {
     global $wpdb;
 
-    $sql = $wpdb->prepare("SELECT * FROM {$wpdb->prefix}ts_redirects WHERE id = %d", array($id));
-    $result = $wpdb->query($sql);
+    $result = $wpdb->query($wpdb->prepare("SELECT * FROM {$wpdb->prefix}ts_redirects WHERE id = %d", array($id))); //phpcs:ignore
     if ($result !== 0) {
       $fields = array();
-      foreach ($wpdb->get_results($sql) as $row) {
+      foreach ($wpdb->get_results($wpdb->prepare("SELECT * FROM {$wpdb->prefix}ts_redirects WHERE id = %d", array($id))) as $row) { //phpcs:ignore
         $fields['title'] = $row->title;
         $fields['section'] = $row->section;
         $fields['new_link'] = $row->new_link;
@@ -44,8 +42,7 @@ class Redirects
   {
     global $wpdb;
 
-    $sql = "CREATE TABLE {$wpdb->prefix}ts_redirects (id BIGINT(20) PRIMARY KEY AUTO_INCREMENT,title TEXT,section TEXT, new_link TEXT, old_link TEXT)";
-    $wpdb->query($sql);
+    $wpdb->query("CREATE TABLE {$wpdb->prefix}ts_redirects (id BIGINT(20) PRIMARY KEY AUTO_INCREMENT,title TEXT,section TEXT, new_link TEXT, old_link TEXT)"); //phpcs:ignore
   } // createRedirectsTable
 
 
@@ -53,14 +50,12 @@ class Redirects
   {
     global $wpdb;
 
-    $sql = "SHOW TABLES LIKE 'ts_redirects'";
-    $result = $wpdb->get_results($sql);
+    $result = $wpdb->get_results("SHOW TABLES LIKE 'ts_redirects'"); //phpcs:ignore
     if (sizeof($result) == 1) {
-      $wpdb->query("RENAME TABLE ts_redirects TO {$wpdb->prefix}ts_redirects");
+      $wpdb->query("RENAME TABLE ts_redirects TO {$wpdb->prefix}ts_redirects"); //phpcs:ignore
     }
 
-    $sql = "SHOW TABLES LIKE '{$wpdb->prefix}ts_redirects'";
-    $result = $wpdb->get_results($sql);
+    $result = $wpdb->get_results("SHOW TABLES LIKE '{$wpdb->prefix}ts_redirects'"); //phpcs:ignore
     if (sizeof($result) != 1) {
       $this->createRedirectsTable();
     }
@@ -73,12 +68,11 @@ class Redirects
 
     $this->checkForRedirectsTable();
 
-    $sql = "SELECT * FROM {$wpdb->prefix}ts_redirects ORDER by id ASC";
-    $result = $wpdb->query($sql);
+    $result = $wpdb->query("SELECT * FROM {$wpdb->prefix}ts_redirects ORDER by id ASC"); //phpcs:ignore
     if ($result !== 0) {
 
       $id_arr = array();
-      foreach ($wpdb->get_results($sql) as $row) {
+      foreach ($wpdb->get_results("SELECT * FROM {$wpdb->prefix}ts_redirects ORDER by id ASC") as $row) { //phpcs:ignore
         $id_arr[] = $row->id;
       }
 
@@ -93,8 +87,7 @@ class Redirects
   {
     global $wpdb;
 
-    $sql = $wpdb->prepare("DELETE FROM {$wpdb->prefix}ts_redirects WHERE id = %d", array($custom_id));
-    $wpdb->query($sql);
+    $wpdb->query($wpdb->prepare("DELETE FROM {$wpdb->prefix}ts_redirects WHERE id = %d", array($custom_id))); //phpcs:ignore
   }
 } // remove
 
