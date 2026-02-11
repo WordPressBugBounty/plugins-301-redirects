@@ -7,7 +7,7 @@
   Author: WebFactory Ltd
   Author URI: https://www.webfactoryltd.com/
   Requires at least: 4.0
-  Tested up to: 6.8
+  Tested up to: 6.9
   Requires PHP: 5.2
   License: GPLv2 or later
 
