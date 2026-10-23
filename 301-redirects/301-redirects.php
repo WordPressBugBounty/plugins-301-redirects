@@ -7,11 +7,11 @@
   Author: WebFactory Ltd
   Author URI: https://www.webfactoryltd.com/
   Requires at least: 4.0
-  Tested up to: 6.9
+  Tested up to: 7.1
   Requires PHP: 5.2
   License: GPLv2 or later
 
-  Copyright 2019 - 2025  WebFactory Ltd  (email: wp301@webfactoryltd.com)
+  Copyright 2019 - 2026  WebFactory Ltd  (email: wp301@webfactoryltd.com)
   Copyright 2015 - 2019  @tonyspiro
 
   This program is free software; you can redistribute it and/or modify
